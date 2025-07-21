@@ -4,7 +4,7 @@ from .models import Book
 class BookUploadSerializer(serializers.ModelSerializer):
     class Meta:
         model = Book
-        fields=['id','name','author','genre','cover','document']
+        fields=['id','name','author','genre','summary','cover','document']
 
         
         def validate_cover(self,value):
@@ -25,5 +25,5 @@ class BookUploadSerializer(serializers.ModelSerializer):
 class BookListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Book
-        fields=['id','name','author','genre','cover','document']
+        fields=['id','name','author','genre','summary','cover','document']
 

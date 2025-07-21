@@ -1,5 +1,4 @@
 from django.db import models
-from django.db.models import F
 import uuid
 from django.conf import settings 
 from .storage import GoogleDriveStorage
@@ -9,15 +8,16 @@ class Book(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=255, null=False, blank=False)
     author = models.CharField(max_length=255, null=False, blank=False)
-    cover = models.ImageField(upload_to="cover_photo/", blank=True, storage=GoogleDriveStorage) # CHANGED: Pass the class
+    summary = models.TextField(null=False, blank=False,default="Book Summary")
+    cover = models.ImageField(upload_to="cover_photo/", blank=True, storage=GoogleDriveStorage) 
     genre = models.CharField(max_length=255, null=False, blank=False)
-    document = models.FileField(upload_to='book_pdf/', blank=True, storage=GoogleDriveStorage) # CHANGED: Pass the class
+    document = models.FileField(upload_to='book_pdf/', blank=True, storage=GoogleDriveStorage) 
     like = models.BooleanField(default=False)
     number_of_likes = models.PositiveIntegerField(default=0)
 
 
     def __str__(self):
-        return f"{self.name} and {self.author}"
+        return f"{self.name}"
     
 
 class UserBookLike(models.Model):
@@ -32,3 +32,12 @@ class UserBookLike(models.Model):
     def __str__(self):
         return f"{self.user.username} likes {self.book.name}"
     
+
+class BookReport(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    book = models.ForeignKey(Book, on_delete=models.CASCADE)
+    reason = models.TextField(blank=True)
+    reported_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.user.email} reported '{self.book.name}'"

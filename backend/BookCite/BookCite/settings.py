@@ -11,6 +11,12 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
 from pathlib import Path
+from datetime import timedelta
+import os
+import dj_database_url
+from dotenv import load_dotenv
+load_dotenv()
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -20,12 +26,11 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "django-insecure-f0=p)!02s@qt4r1&$0xjvz8oc!-hbyf-+l(86ma6615sb)xzus"
-
+SECRET_KEY = os.getenv('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.getenv('DEBUG', 'True') == 'True'
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '').split(',')
 
 
 # Application definition
@@ -80,12 +85,8 @@ WSGI_APPLICATION = "BookCite.wsgi.application"
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
 DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
-    }
+    'default': dj_database_url.config(default=os.getenv('DATABASE_URL'))
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
@@ -134,6 +135,18 @@ REST_FRAMEWORK = {
     )
 }
 
+
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(days=1),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
+    "ROTATE_REFRESH_TOKENS": True,
+    "BLACKLIST_AFTER_ROTATION": True,
+    "UPDATE_LAST_LOGIN": True,
+    "ALGORITHM": "HS256",
+    "SIGNING_KEY": SECRET_KEY,
+    "VERIFYING_KEY": None,
+}
+
 CSRF_COOKIE_NAME = "csrftoken"
 CSRF_HEADER_NAME = "HTTP_X_CSRFTOKEN"
 CSRF_USE_SESSIONS = False
@@ -148,9 +161,18 @@ CORS_ALLOW_CREDENTIALS = True
 AUTH_USER_MODEL = 'Users.CustomUser'
 
 
-import os
-GOOGLE_DRIVE_CREDENTIALS_FILE = os.path.join(BASE_DIR, 'client_secrets.json')
-GOOGLE_DRIVE_TOKEN_FILE = os.path.join(BASE_DIR, 'token.pickle')
-GOOGLE_DRIVE_ROOT_FOLDER_ID = '1OQGRFT8lHJOKzob3ceUUkCCabhQXvdwP'
-GOOGLE_DRIVE_PUBLIC_UPLOADS = True
-DEFAULT_FILE_STORAGE = 'book.storage.GoogleDriveStorage'
+GOOGLE_DRIVE_CREDENTIALS_FILE = os.path.join(BASE_DIR, os.getenv('GOOGLE_DRIVE_CREDENTIALS_FILE', 'client_secrets.json'))
+GOOGLE_DRIVE_TOKEN_FILE = os.path.join(BASE_DIR, os.getenv('GOOGLE_DRIVE_TOKEN_FILE', 'token.pickle'))
+GOOGLE_DRIVE_ROOT_FOLDER_ID = os.getenv('GOOGLE_DRIVE_ROOT_FOLDER_ID')
+GOOGLE_DRIVE_PUBLIC_UPLOADS = os.getenv('GOOGLE_DRIVE_PUBLIC_UPLOADS', 'True') == 'True'
+DEFAULT_FILE_STORAGE = os.getenv('DEFAULT_FILE_STORAGE', 'book.storage.GoogleDriveStorage')
+
+CACHES = {
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": os.getenv('REDIS_CACHE_URL'),
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+        }
+    }
+}

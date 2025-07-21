@@ -3,157 +3,203 @@ from rest_framework import status
 from django.db import transaction
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.response import Response
-from rest_framework.permissions import AllowAny,IsAuthenticated 
+from rest_framework.permissions import IsAuthenticated 
 from .serializers import BookUploadSerializer,BookListSerializer
-from .models import Book, UserBookLike
-from django.http import FileResponse
+from .models import Book, UserBookLike,BookReport
 from django.db.models import F
-from .drive_service import download_file_from_drive
 from rest_framework.pagination import PageNumberPagination
-from asgiref.sync import sync_to_async
-
+from django.http import FileResponse, Http404
+from .storage import GoogleDriveStorage
+from django.utils.decorators import method_decorator
+from django.views.decorators.cache import cache_page
 
 class BookUploadView(APIView):
     permission_classes = [IsAuthenticated]
     parser_classes = [MultiPartParser, FormParser]
 
-    async def post(self, request):
+    def post(self, request):
         serializer = BookUploadSerializer(data=request.data)
 
-        await sync_to_async(serializer.is_valid, thread_sensitive=True)(raise_exception=True)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-        @sync_to_async
-        @transaction.atomic
-        def validate_and_save():
-            serializer.is_valid(raise_exception=True)
-            return serializer.save()
-
-        book = await validate_and_save()
-        
-        @sync_to_async
-        def get_urls():
-            return {
-                'cover_url': book.cover.url if book.cover else None,
-                'document_url': book.document.url if book.document else None
-            }
-
-        urls = await get_urls()
+        with transaction.atomic():
+            book = serializer.save()
 
         return Response({
             'message': "Book created successfully!",
             'book_id': book.id,
             'book_name': book.name,
             'book_author': book.author,
+            'book_summary': book.summary,
             'book_genre': book.genre,
-            **urls
+            'cover_url': book.cover.url if book.cover else None,
+            'document_url': book.document.url if book.document else None,
         }, status=status.HTTP_201_CREATED)
 
 
 class BookPagination(PageNumberPagination):
     page_size = 10
 
-
+@method_decorator(cache_page(60 * 2), name='dispatch')  
 class BookListView(APIView):
-    permission_classes=[AllowAny]
+    permission_classes=[IsAuthenticated]
     pagination_class = BookPagination
 
     def get(self,request):
-        genre=request.GET.get('genre')
-        author=request.GET.get('author')
-        name=request.GET.get('name')
-        books=None
-        try:
-            filters={}
-            if genre:
-                filters['genre__iexact']=genre
-            if author:
-                filters['author__iexact']=author
-            if name:
-                filters['name__icontains']=name
+        books=Book.objects.all()
+        book_serializer=BookListSerializer(books,many=True,context={'request':request})
+        return Response({"data": book_serializer.data}, status=status.HTTP_200_OK)
 
-            if filters:
-                books=Book.objects.filter(**filters)
-                if not books.exists():
-                    return Response(
-                        {"error":f" No books found matching the given filters,"},
-                        status=status.HTTP_404_NOT_FOUND
-                    )
-            else:
-                books=Book.objects.all()
-            book_serializer=BookListSerializer(books,many=True,context={'request':request})
-            return Response(book_serializer.data,status=status.HTTP_200_OK)
-        
-        except Exception as e:
-           
-            print(f"An unexpected error occurred in BookListView: {e}")
-            return Response(
-                {'error': 'An internal server error occurred.', 'details': str(e)},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
-            )
+
+@method_decorator(cache_page(60 * 2), name='dispatch')  
+class BookGenreListView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        genre = request.GET.get('genre')
+        if not genre:
+            return Response({"error": "Missing genre query parameter."}, status=status.HTTP_400_BAD_REQUEST)
+        books = Book.objects.filter(genre__iexact=genre)
+        if not books.exists():
+            return Response({"error": "No books found for this genre."}, status=status.HTTP_404_NOT_FOUND)
+        book_serializer = BookListSerializer(books, many=True, context={'request': request})
+        return Response({"data": book_serializer.data}, status=status.HTTP_200_OK)
+
+
+@method_decorator(cache_page(60 * 2), name='dispatch')  
+class BookNameListView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        name = request.GET.get('name')
+        if not name:
+            return Response({"error": "Missing name query parameter."}, status=status.HTTP_400_BAD_REQUEST)
+        books = Book.objects.filter(name__iexact=name)
+        if not books.exists():
+            return Response({"error": "No books found for this name."}, status=status.HTTP_404_NOT_FOUND)
+        book_serializer = BookListSerializer(books, many=True, context={'request': request})
+        return Response(book_serializer.data, status=status.HTTP_200_OK)
+
+
+@method_decorator(cache_page(60 * 2), name='dispatch')  
+class BookAuthorListView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        author = request.GET.get('author')
+        if not author:
+            return Response({"error": "Missing author query parameter."}, status=status.HTTP_400_BAD_REQUEST)
+        books = Book.objects.filter(author__iexact=author)
+        if not books.exists():
+            return Response({"error": "No books found for this author."}, status=status.HTTP_404_NOT_FOUND)
+        book_serializer = BookListSerializer(books, many=True, context={'request': request})
+        return Response(book_serializer.data, status=status.HTTP_200_OK)
+
 
 class BookDownloadView(APIView):
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
 
-    async def get(self, request, pk):
+    def get(self, request):
+        book_id = request.GET.get('book_id')
+        if not book_id:
+            return Response({"error": "Missing book_id query parameter."}, status=status.HTTP_400_BAD_REQUEST)
         try:
-            book = await sync_to_async(Book.objects.get)(pk=pk)
+            book = Book.objects.get(id=book_id)
         except Book.DoesNotExist:
-            return Response({'error': 'Book not found'}, status=404)
+            raise Http404("Book not found.")
 
         if not book.document:
-            return Response({'error': 'No document for this book'}, status=404)
+            return Response({"error": "No document found for this book."}, status=status.HTTP_404_NOT_FOUND)
 
-        file_content = await sync_to_async(download_file_from_drive)(book.document.name)  
+        storage = GoogleDriveStorage()
 
-        if not file_content:
-            return Response({'error': 'Failed to download file'}, status=500)
+        try:
+            file = storage.open(book.document.name, mode='rb')
+        except FileNotFoundError:
+            return Response({"error": "File not found on Google Drive."}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-        response = FileResponse(file_content, content_type='application/pdf')
-        response['Content-Disposition'] = f'attachment; filename="{book.name}.pdf"'
+        response = FileResponse(file, as_attachment=True, filename=f"{book.name}.pdf")
+        response['Content-Type'] = 'application/pdf'
         return response
     
 
 class BookLikeToggleView(APIView):
-    
-    permission_classes=[IsAuthenticated]
+    permission_classes = [IsAuthenticated]
 
     @transaction.atomic
-    def post(self,request,pk):
+    def post(self, request):
+        book_id = request.data.get('book_id')
+        if not book_id:
+            return Response(
+                {'error': 'Missing book_id in request body.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
         try:
-            book=Book.objects.get(id=pk)
+            book = Book.objects.get(id=book_id)
         except Book.DoesNotExist:
             return Response(
-                {'detail':'Book not found.'},
+                {'detail': 'Book not found.'},
                 status=status.HTTP_404_NOT_FOUND
             )
-        
-        user=request.user
+
+        user = request.user
 
         try:
-            like_instance=UserBookLike.objects.get(user=user,book=book)
+            like_instance = UserBookLike.objects.get(user=user, book=book)
             like_instance.delete()
-            book.number_of_likes=F('number_of_likes')-1
-            message="Book unliked."
-            print(f"Debug: User {user.username} unliked book {book.name}.")
+            book.number_of_likes = F('number_of_likes') - 1
+            message = "Book unliked."
         except UserBookLike.DoesNotExist:
-            UserBookLike.objects.create(user=user,book=book)
-            book.number_of_likes=F("number_of_likes")+1
-            message="Book liked."
-            print(f"DEBUG: User {user.username} liked book {book.name}.")
+            UserBookLike.objects.create(user=user, book=book)
+            book.number_of_likes = F("number_of_likes") + 1
+            message = "Book liked."
         except Exception as e:
-            print(f"DEBUG: Error during like toggle for book {book.id} by user {user.username}: {e}")
             return Response(
-                {'error':'An error occured while toggling like status.', 'details':str(e)},
+                {'error': 'An error occurred while toggling like status.', 'details': str(e)},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
-        
+
         book.save(update_fields=['number_of_likes'])
         book.refresh_from_db(fields=['number_of_likes'])
 
         return Response(
             {
-             "message": message,
-            "book_id": book.id,
-            "current_likes": book.number_of_likes   
-            },status=status.HTTP_200_OK
+                "message": message,
+                "book_id": book.id,
+                "current_likes": book.number_of_likes
+            }, status=status.HTTP_200_OK
         )
+
+
+@method_decorator(cache_page(60 * 2), name='dispatch')     
+class UserLikedBooksView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        liked_books=Book.objects.filter(userbooklike__user=request.user)
+        serializer = BookListSerializer(liked_books, many=True, context={'request': request})
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class ReportBookView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self,request):
+        book_id=request.data.get('book_id')
+        reason=request.data.get('reason')
+        if not book_id :
+            return Response({"error":"Missing Book ID in the request body."},status=status.HTTP_400_BAD_REQUEST)
+        try:
+            book=Book.objects.get(id=book_id)
+        except Book.DoesNotExist:
+            return Response({"error":"Book not found."},status=status.HTTP_404_NOT_FOUND)
+        
+        BookReport.objects.create(
+            user=request.user,
+            book=book,
+            reason=reason
+        )
+        return Response({"message":"Book reported successfully."},status=status.HTTP_201_CREATED)
