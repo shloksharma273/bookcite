@@ -45,8 +45,8 @@ class GoogleDriveStorage(Storage):
         return mimetype or 'application/octet-stream'
 
     def _get_file_id(self, name):
-        clean_name = os.path.basename(name).replace("'", "\\'")
-        query = f"name='{clean_name}' and trashed=false"
+        clean_name = os.path.basename(name)
+        query = f'name="{clean_name}" and trashed=false'
         if self.folder_id:
             query += f" and '{self.folder_id}' in parents"
 
@@ -55,6 +55,7 @@ class GoogleDriveStorage(Storage):
         ).execute()
         files = response.get("files", [])
         return files[0]["id"] if files else None
+
 
     def _save(self, name, content):
         file_metadata = {'name': os.path.basename(name)}
