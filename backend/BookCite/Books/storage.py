@@ -46,7 +46,10 @@ class GoogleDriveStorage(Storage):
 
     def _get_file_id(self, name):
         clean_name = os.path.basename(name)
-        query = f'name="{clean_name}" and trashed=false'
+        
+        escaped_name = clean_name.replace('\\', '\\\\').replace('"', '\\"')
+        
+        query = f'name="{escaped_name}" and trashed=false'
         if self.folder_id:
             query += f" and '{self.folder_id}' in parents"
 
