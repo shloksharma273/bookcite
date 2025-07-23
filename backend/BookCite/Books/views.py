@@ -57,13 +57,18 @@ class BookGenreListView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        genre = request.GET.get('genre')
-        if not genre:
-            return Response({"error": "Missing genre query parameter."}, status=status.HTTP_400_BAD_REQUEST)
-        books = Book.objects.filter(genre__iexact=genre)
+        genres = request.GET.getlist('genre')
+        
+        if not genres:
+            return Response({"error": "Missing genre query parameters."}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Find books where any genre in book.genre matches the requested genre
+        books = Book.objects.filter(genre__overlap=genres)
+
         if not books.exists():
-            return Response({"error": "No books found for this genre."}, status=status.HTTP_404_NOT_FOUND)
-        book_serializer = BookListSerializer(books, many=True, context={'request': request})
+            return Response({"error": "No books found for the provided genres."}, status=status.HTTP_404_NOT_FOUND)
+
+        book_serializer = BookListSerializer(books.distinct(), many=True, context={'request': request})
         return Response({"data": book_serializer.data}, status=status.HTTP_200_OK)
 
 
