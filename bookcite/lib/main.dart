@@ -2,6 +2,7 @@ import 'package:bookcite/authentication/login_page.dart';
 import 'package:bookcite/genre_page/genre_page.dart';
 import 'package:bookcite/homepage/home_page.dart';
 import 'package:bookcite/search_page/search_page.dart';
+import 'package:bookcite/upload_book/upload_book.dart';
 import 'package:bookcite/utils/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -56,7 +57,7 @@ class MyApp extends StatelessWidget {
         ),
         useMaterial3: true,
       ),
-      home: const SearchPage(),
+      home: const LoginPage(),
     );
   }
 }
