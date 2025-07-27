@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Book
+from .models import Book,BookReport
 
 class BookUploadSerializer(serializers.ModelSerializer):
     class Meta:
@@ -27,3 +27,8 @@ class BookListSerializer(serializers.ModelSerializer):
         model = Book
         fields=['id','name','author','genre','summary','cover','document']
 
+
+class BookReportSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = BookReport
+        fields = ['book', 'reason']  

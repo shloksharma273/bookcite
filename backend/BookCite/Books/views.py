@@ -4,8 +4,8 @@ from django.db import transaction
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated 
-from .serializers import BookUploadSerializer,BookListSerializer
-from .models import Book, UserBookLike,BookReport
+from .serializers import BookUploadSerializer,BookListSerializer,BookReportSerializer
+from .models import Book
 from django.db.models import F
 from rest_framework.pagination import PageNumberPagination
 from django.http import FileResponse, Http404
@@ -138,73 +138,51 @@ class BookLikeToggleView(APIView):
     def post(self, request):
         book_id = request.data.get('book_id')
         if not book_id:
-            return Response(
-                {'error': 'Missing book_id in request body.'},
-                status=status.HTTP_400_BAD_REQUEST
-            )
+            return Response({'error': 'Missing book_id'}, status=status.HTTP_400_BAD_REQUEST)
+
         try:
-            book = Book.objects.get(id=book_id)
+            book = Book.objects.select_for_update().get(id=book_id)
         except Book.DoesNotExist:
-            return Response(
-                {'detail': 'Book not found.'},
-                status=status.HTTP_404_NOT_FOUND
-            )
+            return Response({'error': 'Book not found'}, status=status.HTTP_404_NOT_FOUND)
 
         user = request.user
 
-        try:
-            like_instance = UserBookLike.objects.get(user=user, book=book)
-            like_instance.delete()
+        if book in user.liked_books.all():
+            user.liked_books.remove(book)
             book.number_of_likes = F('number_of_likes') - 1
             message = "Book unliked."
-        except UserBookLike.DoesNotExist:
-            UserBookLike.objects.create(user=user, book=book)
-            book.number_of_likes = F("number_of_likes") + 1
+        else:
+            user.liked_books.add(book)
+            book.number_of_likes = F('number_of_likes') + 1
             message = "Book liked."
-        except Exception as e:
-            return Response(
-                {'error': 'An error occurred while toggling like status.', 'details': str(e)},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
-            )
 
         book.save(update_fields=['number_of_likes'])
         book.refresh_from_db(fields=['number_of_likes'])
 
-        return Response(
-            {
-                "message": message,
-                "book_id": book.id,
-                "current_likes": book.number_of_likes
-            }, status=status.HTTP_200_OK
-        )
+        return Response({
+            'message': message,
+            'book_id': book.id,
+            'current_likes': book.number_of_likes
+        }, status=status.HTTP_200_OK)
 
 
-@method_decorator(cache_page(60 * 2), name='dispatch')     
+@method_decorator(cache_page(60 * 2), name='dispatch')
 class UserLikedBooksView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        liked_books=Book.objects.filter(userbooklike__user=request.user)
+        liked_books = request.user.liked_books.only("id", "name").all()
         serializer = BookListSerializer(liked_books, many=True, context={'request': request})
         return Response(serializer.data, status=status.HTTP_200_OK)
+
 
 
 class ReportBookView(APIView):
     permission_classes = [IsAuthenticated]
 
-    def post(self,request):
-        book_id=request.data.get('book_id')
-        reason=request.data.get('reason')
-        if not book_id :
-            return Response({"error":"Missing Book ID in the request body."},status=status.HTTP_400_BAD_REQUEST)
-        try:
-            book=Book.objects.get(id=book_id)
-        except Book.DoesNotExist:
-            return Response({"error":"Book not found."},status=status.HTTP_404_NOT_FOUND)
-        
-        BookReport.objects.create(
-            user=request.user,
-            book=book,
-            reason=reason
-        )
-        return Response({"message":"Book reported successfully."},status=status.HTTP_201_CREATED)
+    def post(self, request):
+        serializer = BookReportSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save(user=request.user)
+            return Response({"message": "Book reported successfully."}, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

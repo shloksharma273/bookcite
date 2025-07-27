@@ -12,7 +12,6 @@ class Book(models.Model):
     cover = models.ImageField(upload_to="cover_photo/", blank=True, storage=GoogleDriveStorage) 
     genre = ArrayField(models.CharField(max_length=50), blank=True, default=list)
     document = models.FileField(upload_to='book_pdf/', blank=True, storage=GoogleDriveStorage) 
-    like = models.BooleanField(default=False)
     number_of_likes = models.PositiveIntegerField(default=0)
 
 
@@ -20,18 +19,6 @@ class Book(models.Model):
         return f"{self.name}"
     
 
-class UserBookLike(models.Model):
-    user=models.ForeignKey(settings.AUTH_USER_MODEL,on_delete=models.CASCADE)
-    book=models.ForeignKey(Book,on_delete=models.CASCADE)
-
-    class Meta:
-        unique_together=('user','book')
-        verbose_name="User Book Like"
-        verbose_name_plural="User Book Likes"
-    
-    def __str__(self):
-        return f"{self.user.username} likes {self.book.name}"
-    
 
 class BookReport(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)

@@ -12,6 +12,6 @@ urlpatterns = [
     path('liked-books/', UserLikedBooksView.as_view()),
     path('report-book/', ReportBookView.as_view()),
     path('download/', BookDownloadView.as_view()),
-    path('toggle_like/', BookLikeToggleView.as_view(), name='book_toggle_like'),
+    path('toggle-like/', BookLikeToggleView.as_view(), name='book_toggle_like'),
 
 ]

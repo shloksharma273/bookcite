@@ -1,5 +1,6 @@
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 from django.db import models
+from Books.models import Book
 
 class CustomUserManager(BaseUserManager):
     def create_user(self, email, password=None, **extra_fields):
@@ -22,6 +23,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     name= models.CharField(max_length=255, blank=True)
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
+    liked_books = models.ManyToManyField(Book, related_name='liked_by', blank=True)
 
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = ["name"]
