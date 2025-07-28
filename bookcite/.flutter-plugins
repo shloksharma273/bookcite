@@ -1,6 +1,11 @@
 # This is a generated file; do not edit or check into version control.
 file_picker=/home/shawarma/.pub-cache/hosted/pub.dev/file_picker-10.2.0/
 flutter_plugin_android_lifecycle=/home/shawarma/.pub-cache/hosted/pub.dev/flutter_plugin_android_lifecycle-2.0.28/
+flutter_secure_storage=/home/shawarma/.pub-cache/hosted/pub.dev/flutter_secure_storage-9.2.4/
+flutter_secure_storage_linux=/home/shawarma/.pub-cache/hosted/pub.dev/flutter_secure_storage_linux-1.2.3/
+flutter_secure_storage_macos=/home/shawarma/.pub-cache/hosted/pub.dev/flutter_secure_storage_macos-3.1.3/
+flutter_secure_storage_web=/home/shawarma/.pub-cache/hosted/pub.dev/flutter_secure_storage_web-1.2.1/
+flutter_secure_storage_windows=/home/shawarma/.pub-cache/hosted/pub.dev/flutter_secure_storage_windows-3.1.2/
 path_provider=/home/shawarma/.pub-cache/hosted/pub.dev/path_provider-2.1.5/
 path_provider_android=/home/shawarma/.pub-cache/hosted/pub.dev/path_provider_android-2.2.17/
 path_provider_foundation=/home/shawarma/.pub-cache/hosted/pub.dev/path_provider_foundation-2.4.1/

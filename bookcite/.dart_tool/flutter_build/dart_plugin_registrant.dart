@@ -15,6 +15,7 @@ import 'package:path_provider_linux/path_provider_linux.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:path_provider_foundation/path_provider_foundation.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:flutter_secure_storage_windows/flutter_secure_storage_windows.dart';
 import 'package:path_provider_windows/path_provider_windows.dart';
 
 @pragma('vm:entry-point')
@@ -104,6 +105,15 @@ class _PluginRegistrant {
       } catch (err) {
         print(
           '`file_picker` threw an error: $err. '
+          'The app may not function as expected until you remove this plugin from pubspec.yaml'
+        );
+      }
+
+      try {
+        FlutterSecureStorageWindows.registerWith();
+      } catch (err) {
+        print(
+          '`flutter_secure_storage_windows` threw an error: $err. '
           'The app may not function as expected until you remove this plugin from pubspec.yaml'
         );
       }

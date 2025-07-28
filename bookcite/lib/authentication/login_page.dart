@@ -1,4 +1,6 @@
 import 'package:bookcite/authentication/signup_page.dart';
+import 'package:bookcite/services/api_services.dart';
+import 'package:bookcite/services/models/auth_response.dart';
 import 'package:bookcite/utils/app_assets.dart';
 import 'package:bookcite/utils/app_colors.dart';
 import 'package:bookcite/widgets/custom_button.dart';
@@ -6,9 +8,42 @@ import 'package:bookcite/widgets/text_field.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
-class LoginPage extends StatelessWidget {
-  const LoginPage({super.key});
+class LoginPage extends StatefulWidget {
+  final ApiService apiService ;
+  const LoginPage({super.key, required this.apiService});
 
+  @override
+  State<LoginPage> createState() => _LoginPageState();
+}
+
+class _LoginPageState extends State<LoginPage> {
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  bool _isLoading = false;
+  
+  Future<void> _login() async{
+    print("_login function");
+    setState(() {
+      _isLoading = true; } );
+
+    try{
+      AuthResponse authResponse = await widget.apiService.login(email: _emailController.text, password: _passwordController.text);
+
+      Navigator.of(context).pushReplacementNamed('/home');
+    } catch(e){
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Login failed: ${e.toString()}')),
+      );
+    }
+
+    finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+
+  }
+  
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
@@ -74,6 +109,7 @@ class LoginPage extends StatelessWidget {
                       height: MediaQuery.of(context).size.height * 0.03,
                     ),
                     HomePageTextField(
+                      controller: _emailController,
                       labelText: "Enter Email ID",
                       toObscure: false,
                     ),
@@ -81,6 +117,7 @@ class LoginPage extends StatelessWidget {
                       height: MediaQuery.of(context).size.height * 0.03,
                     ),
                     HomePageTextField(
+                      controller: _passwordController,
                         labelText: "Enter Password", toObscure: true),
                     SizedBox(
                       height: MediaQuery.of(context).size.height * 0.001,
@@ -95,7 +132,12 @@ class LoginPage extends StatelessWidget {
                         ),
                       ),
                     ),
-                    CustomButton(onTap: (){}, title: "Login",),
+
+                    CustomButton(onTap: (){
+                      _login() ;
+                      print("Login Button");
+                    }, title: "Login",),
+
                     SizedBox(
                       height: MediaQuery.of(context).size.height * 0.04
 
@@ -107,7 +149,7 @@ class LoginPage extends StatelessWidget {
                         Text("Not Register Yet? " , style: textTheme.bodySmall,),
                         GestureDetector(
                           onTap: () { Navigator.push(
-                            context, MaterialPageRoute(builder: (context) => const SignUpPage(),),);
+                            context, MaterialPageRoute(builder: (context) => SignUpPage(),),);
                           },
                           child: Text("Create Account", style: textTheme.bodySmall?.copyWith(fontWeight: FontWeight.bold),),
                         )

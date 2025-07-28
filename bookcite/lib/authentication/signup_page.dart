@@ -1,4 +1,3 @@
-import 'package:bookcite/authentication/login_page.dart';
 import 'package:bookcite/utils/app_assets.dart';
 import 'package:bookcite/utils/app_colors.dart';
 import 'package:bookcite/widgets/custom_button.dart';
@@ -7,8 +6,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 class SignUpPage extends StatelessWidget {
-  const SignUpPage({super.key});
+  SignUpPage({super.key});
 
+  TextEditingController _emailController = TextEditingController();
+  TextEditingController _passwordController = TextEditingController();
+  TextEditingController _nameController = TextEditingController();
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
@@ -75,6 +77,7 @@ class SignUpPage extends StatelessWidget {
                     HomePageTextField(
                       labelText: "Enter Name",
                       toObscure: false,
+                      controller: _nameController,
                     ),
                     SizedBox(
                       height: MediaQuery.of(context).size.height * 0.03,
@@ -82,16 +85,19 @@ class SignUpPage extends StatelessWidget {
                     HomePageTextField(
                       labelText: "Enter Email ID",
                       toObscure: false,
+                      controller: _emailController,
                     ),
                     SizedBox(
                       height: MediaQuery.of(context).size.height * 0.03,
                     ),
                     HomePageTextField(
-                        labelText: "Enter Password", toObscure: true),
+                        labelText: "Enter Password", toObscure: true, controller: _passwordController,),
                     SizedBox(
                       height: MediaQuery.of(context).size.height * 0.03,
                     ),
-                    CustomButton(onTap: (){}, title: "Sign Up",),
+                    CustomButton(onTap: () async{
+
+                    }, title: "Sign Up",),
                     SizedBox(
                         height: MediaQuery.of(context).size.height * 0.04
                     ),
@@ -102,10 +108,7 @@ class SignUpPage extends StatelessWidget {
                         Text("Already have an account? " , style: textTheme.bodySmall,),
                         GestureDetector(
                           onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(builder: (context) => LoginPage())
-                            );
+                            Navigator.pushNamed(context, '/login');
                           },
                           child: Text("Log In", style: textTheme.bodySmall?.copyWith(fontWeight: FontWeight.bold),),
                         )
