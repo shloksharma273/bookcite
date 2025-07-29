@@ -1,3 +1,4 @@
+import 'package:bookcite/services/api_services.dart';
 import 'package:bookcite/utils/app_assets.dart';
 import 'package:bookcite/utils/app_colors.dart';
 import 'package:bookcite/widgets/custom_button.dart';
@@ -5,12 +6,55 @@ import 'package:bookcite/widgets/text_field.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
-class SignUpPage extends StatelessWidget {
-  SignUpPage({super.key});
+class SignUpPage extends StatefulWidget {
+  final ApiService apiService;
+  SignUpPage({super.key, required this.apiService});
 
+  @override
+  State<SignUpPage> createState() => _SignUpPageState();
+}
+
+class _SignUpPageState extends State<SignUpPage> {
   TextEditingController _emailController = TextEditingController();
+
   TextEditingController _passwordController = TextEditingController();
+
   TextEditingController _nameController = TextEditingController();
+  bool _isLoading = false ;
+
+  Future<void> _signup() async {
+    bool hasSignedUp = false;
+    setState(() {
+      _isLoading = true;
+    });
+    try {
+      hasSignedUp = await widget.apiService.signUp(
+          name: _nameController.text,
+          email: _emailController.text,
+          password: _passwordController.text);
+
+      if (hasSignedUp == true) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+              content: Text('User Created by Name: ${_nameController.text}')),
+        );
+        // Navigator.pushNamed(context, '/login');
+         await widget.apiService.login(email: _emailController.text, password: _passwordController.text);
+         Navigator.pushNamed(context, '/home');
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Login failed: ${e.toString()}')),
+      );
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+
+
+  }
+
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
@@ -63,7 +107,7 @@ class SignUpPage extends StatelessWidget {
                               TextSpan(
                                   text: "Unlock a\n",
                                   style:
-                                  TextStyle(color: AppColors.colorBlack)),
+                                      TextStyle(color: AppColors.colorBlack)),
                               TextSpan(
                                   text: "new World",
                                   style: TextStyle(
@@ -91,26 +135,40 @@ class SignUpPage extends StatelessWidget {
                       height: MediaQuery.of(context).size.height * 0.03,
                     ),
                     HomePageTextField(
-                        labelText: "Enter Password", toObscure: true, controller: _passwordController,),
+                      labelText: "Enter Password",
+                      toObscure: true,
+                      controller: _passwordController,
+                    ),
                     SizedBox(
                       height: MediaQuery.of(context).size.height * 0.03,
                     ),
-                    CustomButton(onTap: () async{
-
-                    }, title: "Sign Up",),
-                    SizedBox(
-                        height: MediaQuery.of(context).size.height * 0.04
-                    ),
-
+                    //TODO: to add loading animation
+                    _isLoading?CircularProgressIndicator(
+                      color: Colors.black,
+                    ):
+                    CustomButton(
+                      onTap: () {
+                        _signup();
+                      },
+                      title: "Sign Up",
+                    ) ,
+                    SizedBox(height: MediaQuery.of(context).size.height * 0.04),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Text("Already have an account? " , style: textTheme.bodySmall,),
+                        Text(
+                          "Already have an account? ",
+                          style: textTheme.bodySmall,
+                        ),
                         GestureDetector(
                           onTap: () {
                             Navigator.pushNamed(context, '/login');
                           },
-                          child: Text("Log In", style: textTheme.bodySmall?.copyWith(fontWeight: FontWeight.bold),),
+                          child: Text(
+                            "Log In",
+                            style: textTheme.bodySmall
+                                ?.copyWith(fontWeight: FontWeight.bold),
+                          ),
                         )
                       ],
                     )

@@ -14,22 +14,28 @@ class ApiService {
     final response = await http.post(url,
         headers: {'Content-Type': 'application/json'},
         body: json.encode({'email': email, 'password': password}));
-    print(response.body);
 
-    if (response.statusCode == 200) {
-      final data = json.decode(response.body);
-      final authResponse = AuthResponse.fromJSON(json: data);
-      await _secureStorage.write(
-          key: 'access token', value: authResponse.accessToken);
-      await _secureStorage.write(
-          key: 'refresh token', value: authResponse.refreshToken);
-      print("login successful");
-      //TODO : remove this in production
-      print(authResponse);
-      return authResponse;
-    } else {
-      throw Exception('Failed to Login. Status ${response.statusCode}');
-    }
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        final authResponse = AuthResponse.fromJSON(json: data);
+        await _secureStorage.write(
+            key: 'access token', value: authResponse.accessToken);
+        await _secureStorage.write(
+            key: 'refresh token', value: authResponse.refreshToken);
+
+        //TODO: Remove this print command before production
+        final String? storedToken = await _secureStorage.read(key: 'access token');
+        if (storedToken != null) {
+          print('Stored Access Token: $storedToken');
+        } else {
+          print('No access token stored.');
+        }
+
+        return authResponse;
+      } else {
+        throw Exception('Failed to Login. Status ${response.statusCode}');
+      }
+
   }
   
   Future<bool> signUp({required String name, required String email, required String password}) async{
@@ -48,6 +54,6 @@ class ApiService {
   }
 
   Future<bool> isLoggedIn() async{
-    return await _secureStorage.read(key: 'access') != null;
+    return await _secureStorage.read(key: 'access token') != null;
   }
 }

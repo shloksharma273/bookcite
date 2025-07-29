@@ -28,7 +28,7 @@ class _LoginPageState extends State<LoginPage> {
 
     try{
       AuthResponse authResponse = await widget.apiService.login(email: _emailController.text, password: _passwordController.text);
-
+      //TODO : add cookies storing here
       Navigator.of(context).pushReplacementNamed('/home');
     } catch(e){
       ScaffoldMessenger.of(context).showSnackBar(
@@ -148,8 +148,7 @@ class _LoginPageState extends State<LoginPage> {
                       children: [
                         Text("Not Register Yet? " , style: textTheme.bodySmall,),
                         GestureDetector(
-                          onTap: () { Navigator.push(
-                            context, MaterialPageRoute(builder: (context) => SignUpPage(),),);
+                          onTap: () { Navigator.pushNamed(context, '/signUp');
                           },
                           child: Text("Create Account", style: textTheme.bodySmall?.copyWith(fontWeight: FontWeight.bold),),
                         )

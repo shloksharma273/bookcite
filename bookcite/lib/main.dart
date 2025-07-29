@@ -41,13 +41,14 @@ class MyApp extends StatelessWidget {
             if (snapshot.hasData && snapshot.data == true){
               return HomePage();
             } else {
-              return SignUpPage();
+              return SignUpPage(apiService: _apiService,);
             }
           }
         }
       ),
       routes: {
         '/login' : (context) => LoginPage(apiService: _apiService),
+        '/signUp' : (context) => SignUpPage(apiService: _apiService),
         '/home' : (context) => HomePage()
       },
     );
