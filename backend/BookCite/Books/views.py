@@ -12,79 +12,97 @@ from django.http import FileResponse, Http404
 from .storage import GoogleDriveStorage
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
+from rest_framework import generics
+from .models import Genre
+
 
 class BookUploadView(APIView):
     permission_classes = [IsAuthenticated]
     parser_classes = [MultiPartParser, FormParser]
 
+    # In BookUploadView
     def post(self, request):
         serializer = BookUploadSerializer(data=request.data)
-
-        if not serializer.is_valid():
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-        with transaction.atomic():
+        if serializer.is_valid():
             book = serializer.save()
+            
+            # Return the created book data
+            response_serializer = BookListSerializer(book, context={'request': request})
+            return Response(response_serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-        return Response({
-            'message': "Book created successfully!",
-            'book_id': book.id,
-            'book_name': book.name,
-            'book_author': book.author,
-            'book_summary': book.summary,
-            'book_genre': book.genre,
-            'cover_url': book.cover.url if book.cover else None,
-            'document_url': book.document.url if book.document else None,
-        }, status=status.HTTP_201_CREATED)
 
 
 class BookPagination(PageNumberPagination):
     page_size = 10
 
 @method_decorator(cache_page(60 * 2), name='dispatch')  
-class BookListView(APIView):
-    permission_classes=[IsAuthenticated]
+class BookListView(generics.ListAPIView):
+    permission_classes = [IsAuthenticated]
     pagination_class = BookPagination
+    queryset = Book.objects.select_related().prefetch_related('genre')
+    serializer_class = BookListSerializer
 
-    def get(self,request):
-        books=Book.objects.all()
-        book_serializer=BookListSerializer(books,many=True,context={'request':request})
-        return Response({"data": book_serializer.data}, status=status.HTTP_200_OK)
 
 
 @method_decorator(cache_page(60 * 2), name='dispatch')  
 class BookGenreListView(APIView):
     permission_classes = [IsAuthenticated]
+    pagination_class = BookPagination
+    serializer_class = BookListSerializer
 
     def get(self, request):
-        genres = request.GET.getlist('genre')
+        genre_name = request.GET.get('genre_name')
         
-        if not genres:
-            return Response({"error": "Missing genre query parameters."}, status=status.HTTP_400_BAD_REQUEST)
-
-        # Find books where any genre in book.genre matches the requested genre
-        books = Book.objects.filter(genre__overlap=genres)
-
+        if not genre_name:
+            return Response(
+                {"error": "Missing 'genre_name' query parameter."}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        cleaned_genre_name = genre_name.strip().lower()
+        
+        try:
+            genre = Genre.objects.get(name=cleaned_genre_name)
+        except Genre.DoesNotExist:
+            return Response(
+                {"error": f"Genre '{genre_name}' does not exist."}, 
+                status=status.HTTP_404_NOT_FOUND
+            )
+        
+        books = Book.objects.filter(
+            genre=genre
+        ).select_related().prefetch_related('genre').distinct()
+        
         if not books.exists():
-            return Response({"error": "No books found for the provided genres."}, status=status.HTTP_404_NOT_FOUND)
+            return Response(
+                {"message": f"No books found for genre '{genre_name}'.", "data": []}, 
+                status=status.HTTP_200_OK
+            )
+        
+        paginator = BookPagination()
+        paginated_books = paginator.paginate_queryset(books, request)
+        
+        serializer = BookListSerializer(paginated_books, many=True, context={'request': request})
+        return paginator.get_paginated_response(serializer.data)
 
-        book_serializer = BookListSerializer(books.distinct(), many=True, context={'request': request})
-        return Response({"data": book_serializer.data}, status=status.HTTP_200_OK)
+
 
 
 @method_decorator(cache_page(60 * 2), name='dispatch')  
 class BookNameListView(APIView):
-    permission_classes = [IsAuthenticated]
-
     def get(self, request):
         name = request.GET.get('name')
         if not name:
             return Response({"error": "Missing name query parameter."}, status=status.HTTP_400_BAD_REQUEST)
-        books = Book.objects.filter(name__iexact=name)
+        
+        books = Book.objects.filter(name__icontains=name)
+        
         if not books.exists():
             return Response({"error": "No books found for this name."}, status=status.HTTP_404_NOT_FOUND)
+        
         book_serializer = BookListSerializer(books, many=True, context={'request': request})
-        return Response(book_serializer.data, status=status.HTTP_200_OK)
+        return Response({"data": book_serializer.data}, status=status.HTTP_200_OK)
 
 
 @method_decorator(cache_page(60 * 2), name='dispatch')  
@@ -92,14 +110,23 @@ class BookAuthorListView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        author = request.GET.get('author')
-        if not author:
-            return Response({"error": "Missing author query parameter."}, status=status.HTTP_400_BAD_REQUEST)
-        books = Book.objects.filter(author__iexact=author)
+        genre_ids = request.GET.getlist('genre_id')
+        
+        if not genre_ids:
+            return Response({"error": "Missing 'genre_id' query parameters."}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            genre_ids = [int(gid) for gid in genre_ids]
+        except (ValueError, TypeError):
+            return Response({"error": "Invalid genre_id format. Must be a list of integers."}, status=status.HTTP_400_BAD_REQUEST)
+
+        books = Book.objects.filter(genre__id__in=genre_ids).distinct()
+
         if not books.exists():
-            return Response({"error": "No books found for this author."}, status=status.HTTP_404_NOT_FOUND)
+            return Response({"error": "No books found for the provided genres."}, status=status.HTTP_404_NOT_FOUND)
+
         book_serializer = BookListSerializer(books, many=True, context={'request': request})
-        return Response(book_serializer.data, status=status.HTTP_200_OK)
+        return Response({"data": book_serializer.data}, status=status.HTTP_200_OK)
 
 
 class BookDownloadView(APIView):
