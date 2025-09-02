@@ -3,6 +3,8 @@ from .views import (BookUploadView, BookListView, BookGenreListView,BookNameList
                     BookAuthorListView,BookDownloadView, BookLikeToggleView,UserLikedBooksView,
                     ReportBookView
 )
+from . import views
+
 urlpatterns = [
     path('upload-book/',BookUploadView.as_view()),
     path('list-books/',BookListView.as_view()),
@@ -13,5 +15,6 @@ urlpatterns = [
     path('report-book/', ReportBookView.as_view()),
     path('download/', BookDownloadView.as_view()),
     path('toggle-like/', BookLikeToggleView.as_view(), name='book_toggle_like'),
+    # path('get_quotes/', views.get_quotes_api, name='get_quotes')
 
 ]

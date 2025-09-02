@@ -14,6 +14,10 @@ from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
 from rest_framework import generics
 from .models import Genre
+from rest_framework.decorators import api_view
+import http.client
+import json
+from rest_framework import status
 
 
 class BookUploadView(APIView):
@@ -110,24 +114,13 @@ class BookAuthorListView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        genre_ids = request.GET.getlist('genre_id')
-        
-        if not genre_ids:
-            return Response({"error": "Missing 'genre_id' query parameters."}, status=status.HTTP_400_BAD_REQUEST)
-
-        try:
-            genre_ids = [int(gid) for gid in genre_ids]
-        except (ValueError, TypeError):
-            return Response({"error": "Invalid genre_id format. Must be a list of integers."}, status=status.HTTP_400_BAD_REQUEST)
-
-        books = Book.objects.filter(genre__id__in=genre_ids).distinct()
-
-        if not books.exists():
-            return Response({"error": "No books found for the provided genres."}, status=status.HTTP_404_NOT_FOUND)
-
-        book_serializer = BookListSerializer(books, many=True, context={'request': request})
-        return Response({"data": book_serializer.data}, status=status.HTTP_200_OK)
-
+        author = request.GET.get('author')
+        if author:
+            books = Book.objects.filter(author=author)
+            serializer = BookListSerializer(books, many=True)
+            return Response(serializer.data)
+        else:
+            return Response({'error': 'Author query parameter is required'})
 
 class BookDownloadView(APIView):
     permission_classes = [IsAuthenticated]
@@ -213,3 +206,86 @@ class ReportBookView(APIView):
             serializer.save(user=request.user)
             return Response({"message": "Book reported successfully."}, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+# def generate_quotes_from_title(title):
+#     """
+#     Calls the external API to perform a web search for quotes from a book title.
+    
+#     Args:
+#         title (str): The title of the book to find quotes for.
+        
+#     Returns:
+#         list: A list of quotes found for the book, or an error message.
+#     """
+#     try:
+#         # Create a dynamic prompt to instruct the API to do a web search
+#         prompt = f"Find 5 popular quotes from the book titled '{title}'."
+        
+#         payload_data = {
+#             "messages": [{"role": "user", "content": prompt}],
+#             "web_access": True, # <-- This is the key change
+#             "context_info": f"Book Title: {title}"
+#         }
+#         payload = json.dumps(payload_data)
+
+#         headers = {
+#             'x-rapidapi-key': "f9a37c9e88msh2cf6f14cb2628e8p1b4644jsn1481e0db4996",
+#             'x-rapidapi-host': "chatgpt-42.p.rapidapi.com",
+#             'Content-Type': "application/json"
+#         }
+        
+#         conn = http.client.HTTPSConnection("chatgpt-42.p.rapidapi.com")
+#         conn.request("POST", "/gpt4o", payload, headers)
+#         res = conn.getresponse()
+#         data = res.read()
+        
+#         response_json = json.loads(data.decode("utf-8"))
+
+#         if "error" in response_json:
+#             return [f"API Error: {response_json['error']}"]
+        
+#         if "choices" in response_json and len(response_json["choices"]) > 0:
+#             # The API will return a single block of text containing multiple quotes.
+#             # We split the text by newlines to get a list of quotes.
+#             quote_text = response_json["choices"][0]["message"]["content"]
+#             quotes = [q.strip() for q in quote_text.split('\n') if q.strip()]
+#             return quotes
+#         else:
+#             return ["Unexpected API response format."]
+
+#     except Exception as e:
+#         return [f"An error occurred: {e}"]
+
+# @api_view(['POST'])
+# def get_quotes_api(request):
+#     """
+#     API endpoint to receive a list of books via a POST request
+#     and generate quotes for each one.
+#     """
+#     books_data = request.data.get('books', [])
+
+#     if not books_data:
+#         return Response(
+#             {"error": "Please provide a list of books in the request body."},
+#             status=status.HTTP_400_BAD_REQUEST
+#         )
+    
+#     quotes_results = []
+#     for book in books_data:
+#         title = book.get('title')
+#         if title:
+#             # Call the helper function to get quotes by title
+#             generated_quotes = generate_quotes_from_title(title)
+#             quotes_results.append({
+#                 'book_title': title,
+#                 'quotes': generated_quotes
+#             })
+    
+#     if not quotes_results:
+#         return Response(
+#             {"error": "No quotes could be generated. Ensure books have valid titles."},
+#             status=status.HTTP_404_NOT_FOUND
+#         )
+
+#     return Response({"quotes_results": quotes_results}, status=status.HTTP_200_OK)
