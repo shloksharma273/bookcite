@@ -100,7 +100,7 @@ class BookNameListView(APIView):
         if not name:
             return Response({"error": "Missing name query parameter."}, status=status.HTTP_400_BAD_REQUEST)
         
-        books = Book.objects.filter(name__icontains=name)
+        books = Book.objects.filter(name__iexact=name)
         
         if not books.exists():
             return Response({"error": "No books found for this name."}, status=status.HTTP_404_NOT_FOUND)
@@ -116,7 +116,7 @@ class BookAuthorListView(APIView):
     def get(self, request):
         author = request.GET.get('author')
         if author:
-            books = Book.objects.filter(author=author)
+            books = Book.objects.filter(author__iexact=author)
             serializer = BookListSerializer(books, many=True)
             return Response(serializer.data)
         else:
@@ -208,84 +208,84 @@ class ReportBookView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-# def generate_quotes_from_title(title):
-#     """
-#     Calls the external API to perform a web search for quotes from a book title.
+def generate_quotes_from_title(title):
+    """
+    Calls the external API to perform a web search for quotes from a book title.
     
-#     Args:
-#         title (str): The title of the book to find quotes for.
+    Args:
+        title (str): The title of the book to find quotes for.
         
-#     Returns:
-#         list: A list of quotes found for the book, or an error message.
-#     """
-#     try:
-#         # Create a dynamic prompt to instruct the API to do a web search
-#         prompt = f"Find 5 popular quotes from the book titled '{title}'."
+    Returns:
+        list: A list of quotes found for the book, or an error message.
+    """
+    try:
+        # Create a dynamic prompt to instruct the API to do a web search
+        prompt = f"Find 5 popular quotes from the book titled '{title}'."
         
-#         payload_data = {
-#             "messages": [{"role": "user", "content": prompt}],
-#             "web_access": True, # <-- This is the key change
-#             "context_info": f"Book Title: {title}"
-#         }
-#         payload = json.dumps(payload_data)
+        payload_data = {
+            "messages": [{"role": "user", "content": prompt}],
+            "web_access": True, # <-- This is the key change
+            "context_info": f"Book Title: {title}"
+        }
+        payload = json.dumps(payload_data)
 
-#         headers = {
-#             'x-rapidapi-key': "f9a37c9e88msh2cf6f14cb2628e8p1b4644jsn1481e0db4996",
-#             'x-rapidapi-host': "chatgpt-42.p.rapidapi.com",
-#             'Content-Type': "application/json"
-#         }
+        headers = {
+            'x-rapidapi-key': "f9a37c9e88msh2cf6f14cb2628e8p1b4644jsn1481e0db4996",
+            'x-rapidapi-host': "chatgpt-42.p.rapidapi.com",
+            'Content-Type': "application/json"
+        }
         
-#         conn = http.client.HTTPSConnection("chatgpt-42.p.rapidapi.com")
-#         conn.request("POST", "/gpt4o", payload, headers)
-#         res = conn.getresponse()
-#         data = res.read()
+        conn = http.client.HTTPSConnection("chatgpt-42.p.rapidapi.com")
+        conn.request("POST", "/gpt4o", payload, headers)
+        res = conn.getresponse()
+        data = res.read()
         
-#         response_json = json.loads(data.decode("utf-8"))
+        response_json = json.loads(data.decode("utf-8"))
 
-#         if "error" in response_json:
-#             return [f"API Error: {response_json['error']}"]
+        if "error" in response_json:
+            return [f"API Error: {response_json['error']}"]
         
-#         if "choices" in response_json and len(response_json["choices"]) > 0:
-#             # The API will return a single block of text containing multiple quotes.
-#             # We split the text by newlines to get a list of quotes.
-#             quote_text = response_json["choices"][0]["message"]["content"]
-#             quotes = [q.strip() for q in quote_text.split('\n') if q.strip()]
-#             return quotes
-#         else:
-#             return ["Unexpected API response format."]
+        if "choices" in response_json and len(response_json["choices"]) > 0:
+            # The API will return a single block of text containing multiple quotes.
+            # We split the text by newlines to get a list of quotes.
+            quote_text = response_json["choices"][0]["message"]["content"]
+            quotes = [q.strip() for q in quote_text.split('\n') if q.strip()]
+            return quotes
+        else:
+            return ["Unexpected API response format."]
 
-#     except Exception as e:
-#         return [f"An error occurred: {e}"]
+    except Exception as e:
+        return [f"An error occurred: {e}"]
 
-# @api_view(['POST'])
-# def get_quotes_api(request):
-#     """
-#     API endpoint to receive a list of books via a POST request
-#     and generate quotes for each one.
-#     """
-#     books_data = request.data.get('books', [])
+@api_view(['POST'])
+def get_quotes_api(request):
+    """
+    API endpoint to receive a list of books via a POST request
+    and generate quotes for each one.
+    """
+    books_data = request.data.get('books', [])
 
-#     if not books_data:
-#         return Response(
-#             {"error": "Please provide a list of books in the request body."},
-#             status=status.HTTP_400_BAD_REQUEST
-#         )
+    if not books_data:
+        return Response(
+            {"error": "Please provide a list of books in the request body."},
+            status=status.HTTP_400_BAD_REQUEST
+        )
     
-#     quotes_results = []
-#     for book in books_data:
-#         title = book.get('title')
-#         if title:
-#             # Call the helper function to get quotes by title
-#             generated_quotes = generate_quotes_from_title(title)
-#             quotes_results.append({
-#                 'book_title': title,
-#                 'quotes': generated_quotes
-#             })
+    quotes_results = []
+    for book in books_data:
+        title = book.get('title')
+        if title:
+            # Call the helper function to get quotes by title
+            generated_quotes = generate_quotes_from_title(title)
+            quotes_results.append({
+                'book_title': title,
+                'quotes': generated_quotes
+            })
     
-#     if not quotes_results:
-#         return Response(
-#             {"error": "No quotes could be generated. Ensure books have valid titles."},
-#             status=status.HTTP_404_NOT_FOUND
-#         )
+    if not quotes_results:
+        return Response(
+            {"error": "No quotes could be generated. Ensure books have valid titles."},
+            status=status.HTTP_404_NOT_FOUND
+        )
 
-#     return Response({"quotes_results": quotes_results}, status=status.HTTP_200_OK)
+    return Response({"quotes_results": quotes_results}, status=status.HTTP_200_OK)

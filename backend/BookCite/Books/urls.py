@@ -15,6 +15,6 @@ urlpatterns = [
     path('report-book/', ReportBookView.as_view()),
     path('download/', BookDownloadView.as_view()),
     path('toggle-like/', BookLikeToggleView.as_view(), name='book_toggle_like'),
-    # path('get_quotes/', views.get_quotes_api, name='get_quotes')
+    path('get_quotes/', views.get_quotes_api, name='get_quotes')
 
 ]
