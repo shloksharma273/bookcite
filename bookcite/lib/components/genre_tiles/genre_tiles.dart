@@ -42,10 +42,14 @@ class GenreTiles extends StatelessWidget {
             ),
           ),
 
-          Center(
-            child: Text(label, style: textTheme.bodyMedium?.copyWith(
-              color: Colors.white
-            ),),
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: 8.0),
+            child: Center(
+              child: Text(label, style: textTheme.bodyMedium?.copyWith(
+                color: Colors.white
+              ), textAlign: TextAlign.center,
+              ),
+            ),
           )
         ],
       ),

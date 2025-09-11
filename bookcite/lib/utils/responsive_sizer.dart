@@ -17,19 +17,20 @@ class ResponsiveSizer {
     return GoogleFonts.outfitTextTheme(Theme.of(context).textTheme).copyWith( // Can still copy existing textTheme
         headlineLarge: GoogleFonts.outfit(
             fontSize: getFontSize(37, screenHeight),
-            fontWeight: FontWeight.w800
+            fontWeight: FontWeight.w800, color: Colors.black
         ),
         headlineMedium: GoogleFonts.outfit(
             fontSize: getFontSize(30, screenHeight),
-            fontWeight: FontWeight.w800
+            fontWeight: FontWeight.w800,color: Colors.black
         ),
         headlineSmall: GoogleFonts.outfit(
             fontSize: getFontSize(23, screenHeight),
-            fontWeight: FontWeight.w200
+            fontWeight: FontWeight.w200,
+            color: Colors.black
         ),
         bodyMedium: GoogleFonts.outfit(
             fontSize: getFontSize(18, screenHeight),
-            fontWeight: FontWeight.bold
+            fontWeight: FontWeight.bold, color: Colors.black
         ),
         labelLarge: GoogleFonts.outfit(
           fontSize: getFontSize(18, screenHeight),

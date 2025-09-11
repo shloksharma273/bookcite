@@ -1,11 +1,13 @@
 import 'package:bookcite/authentication/login_page.dart';
 import 'package:bookcite/authentication/signup_page.dart';
+import 'package:bookcite/genre_page/genre_page.dart';
 import 'package:bookcite/homepage/home_page.dart';
+import 'package:bookcite/search_page/search_page.dart';
 import 'package:bookcite/services/api_services.dart';
-import 'package:bookcite/utils/app_colors.dart';
+import 'package:bookcite/todayspick/todays_pick.dart';
 import 'package:bookcite/utils/responsive_sizer.dart';
+import 'package:bookcite/genre_page/genre_page.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 void main() {
   runApp( MyApp());
@@ -49,7 +51,22 @@ class MyApp extends StatelessWidget {
       routes: {
         '/login' : (context) => LoginPage(apiService: _apiService),
         '/signUp' : (context) => SignUpPage(apiService: _apiService),
-        '/home' : (context) => HomePage()
+        '/home' : (context) => HomePage(),
+        '/search' : (context) => SearchPage(),
+        '/todayspick' : (context) => TodaysPick(),
+        '/fiction': (context) => GenrePage(genre: "Fiction"),
+        '/mystery-thriller': (context) => GenrePage(genre: "Mystery, Thriller & Suspense"),
+        '/romance': (context) => GenrePage(genre: "Romance"),
+        '/sci-fi-fantasy': (context) => GenrePage(genre: "Science Fiction & Fantasy"),
+        '/horror': (context) => GenrePage(genre: "Horror & Supernatural"),
+        '/ya': (context) => GenrePage(genre: "Young Adult (YA)"),
+        '/children': (context) => GenrePage(genre: "Children’s Books"),
+        '/non-fiction': (context) => GenrePage(genre: "Non-Fiction"),
+        '/classics': (context) => GenrePage(genre: "Classics"),
+        '/poetry-drama': (context) => GenrePage(genre: "Poetry & Drama"),
+        '/comics': (context) => GenrePage(genre: "Graphic Novels & Comics"),
+        '/academic': (context) => GenrePage(genre: "Educational & Academic"),
+
       },
     );
   }

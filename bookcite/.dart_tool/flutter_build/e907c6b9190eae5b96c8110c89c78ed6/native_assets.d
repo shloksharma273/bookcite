@@ -1,0 +1,1 @@
+ /home/shawarma/bookcite_ws/src/frontend/bookcite/.dart_tool/flutter_build/e907c6b9190eae5b96c8110c89c78ed6/native_assets.yaml: 

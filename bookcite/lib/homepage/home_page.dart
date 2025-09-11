@@ -1,9 +1,7 @@
-import 'package:bookcite/widgets/custom_appbar.dart';
 import 'package:bookcite/widgets/homepage_appbar.dart';
 import 'package:bookcite/widgets/homepage_feed_card.dart';
 import 'package:flutter/material.dart';
 import '../utils/app_colors.dart';
-import '../widgets/book_details.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -23,7 +21,10 @@ class _HomePageState extends State<HomePage> {
       resizeToAvoidBottomInset: true,
       extendBodyBehindAppBar: true,
       appBar: HomepageAppbar(
-          appBarHeight: MediaQuery.of(context).size.height * 0.07),
+          appBarHeight: MediaQuery.of(context).size.height * 0.07,
+
+      searchRoute: '/search',
+      favouriteRoute: '/todayspick',),
       body: Stack(
         children: [
           Positioned(

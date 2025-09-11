@@ -4,7 +4,9 @@ import '../utils/app_colors.dart';
 
 class HomepageAppbar extends StatefulWidget implements PreferredSizeWidget{
   final double appBarHeight;
-  const HomepageAppbar({ required this.appBarHeight, super.key});
+  final String favouriteRoute;
+  final String searchRoute;
+  const HomepageAppbar({ required this.appBarHeight, super.key, required this.favouriteRoute, required this.searchRoute});
 
   @override
   Size get preferredSize => Size.fromHeight(appBarHeight);
@@ -39,11 +41,11 @@ class _HomepageAppbarState extends State<HomepageAppbar> {
       ),
       actions: [
         IconButton(
-          onPressed: () {},
+          onPressed: (){Navigator.pushNamed(context,widget.searchRoute);},
           icon: Icon(Icons.search),
         ),
         IconButton(
-            onPressed: () {}, icon: Icon(Icons.favorite_border_outlined))
+            onPressed: (){Navigator.pushNamed(context,widget.favouriteRoute);}, icon: Icon(Icons.favorite_border_outlined))
       ],
     );
   }

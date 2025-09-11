@@ -1,50 +1,48 @@
+import 'package:bookcite/services/api_services.dart';
+import 'package:bookcite/services/models/book_model.dart';
 import 'package:bookcite/widgets/custom_appbar.dart';
 import 'package:bookcite/widgets/genre_page_tiles.dart';
 import 'package:flutter/material.dart';
-
 import '../utils/app_colors.dart';
 
 class GenrePage extends StatefulWidget {
-  const GenrePage({super.key});
+  final String genre;
+  const GenrePage({super.key, required this.genre});
 
   @override
   State<GenrePage> createState() => _GenrePageState();
 }
 
 class _GenrePageState extends State<GenrePage> {
-  List bookList = [
-    ["To Kill a Mockingbird", "Harper Lee", 378],
-    ["1984", "George Orwell", 152],
-    ["Pride and Prejudice", "Jane Austen", 291],
-    ["The Great Gatsby", "F. Scott Fitzgerald", 486],
-    ["The Catcher in the Rye", "J.D. Salinger", 225],
-    ["Lord of the Rings", "J.R.R. Tolkien", 401],
-    ["Harry Potter and the Sorcerer's Stone", "J.K. Rowling", 119],
-    ["The Hobbit", "J.R.R. Tolkien", 333],
-    ["The Diary of a Young Girl", "Anne Frank", 267],
-    ["Dune", "Frank Herbert", 450]
-  ];
+  late Future<List<Book>> _booksFuture;
+  final ApiService _apiService = ApiService(baseUrl: "https://bookcite.onrender.com");
+
+  @override
+  void initState() {
+    super.initState();
+    _booksFuture = _apiService.fetchBooksByGenre(widget.genre);
+  }
+
   @override
   Widget build(BuildContext context) {
-    TextTheme textTheme = Theme.of(context).textTheme;
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: CustomAppbar(
-        onPressed: () {},
+        onPressed: () => Navigator.pop(context),
         appBarHeight: MediaQuery.of(context).size.height * 0.07,
-        heading: "Editor's Pick",
+        heading: widget.genre,
       ),
       body: Stack(
         children: [
+          // Background decorations
           Positioned(
             top: MediaQuery.of(context).size.height * -0.6,
             right: MediaQuery.of(context).size.width * 0.1,
             child: Container(
-              width: 800, // Adjust size as needed
+              width: 800,
               height: 800,
               decoration: BoxDecoration(
-                color:
-                    AppColors.colorSurfaceSecondary, // Adjust color as needed
+                color: AppColors.colorSurfaceSecondary,
                 shape: BoxShape.circle,
               ),
             ),
@@ -53,34 +51,58 @@ class _GenrePageState extends State<GenrePage> {
             bottom: MediaQuery.of(context).size.height * -0.6,
             left: 0,
             child: Container(
-              width: 800, // Adjust size as needed
+              width: 800,
               height: 800,
               decoration: BoxDecoration(
-                color:
-                    AppColors.colorSurfaceSecondary, // Adjust color as needed
+                color: AppColors.colorSurfaceSecondary,
                 shape: BoxShape.circle,
               ),
             ),
           ),
-          Positioned(
-            top: MediaQuery.of(context).size.height * 0.01,
-            right: 0,
-            left: 0,
-            bottom: MediaQuery.of(context).size.height * 0.001 ,
-            child: GridView.builder(gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2,
-              childAspectRatio: 0.55,
-              crossAxisSpacing: MediaQuery.of(context).size.width * 0.02,
-              mainAxisSpacing: MediaQuery.of(context).size.height * 0.01,
-            ),
-              itemCount: bookList.length,
-              itemBuilder: (context, index) {
-                var book = bookList[index];
-                return GenrePageTiles(author: book[1], title: book[0], likes: book[2]);
+
+          // Books Grid / Loader / Empty state
+          Positioned.fill(
+            child: FutureBuilder<List<Book>>(
+              future: _booksFuture,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                } else if (snapshot.hasError) {
+                  return Center(
+                    child: Text("Error: ${snapshot.error}"),
+                  );
+                } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                  return const Center(
+                    child: Text("No books available for this genre"),
+                  );
+                }
+
+                final books = snapshot.data!;
+                return GridView.builder(
+                  padding: EdgeInsets.symmetric(
+                    vertical: MediaQuery.of(context).size.height * 0.01,
+                    horizontal: MediaQuery.of(context).size.width * 0.02,
+                  ),
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    childAspectRatio: 0.535,
+                    crossAxisSpacing: MediaQuery.of(context).size.width * 0.02,
+                    mainAxisSpacing: MediaQuery.of(context).size.height * 0.01,
+                  ),
+                  itemCount: books.length,
+                  itemBuilder: (context, index) {
+                    final book = books[index];
+                    return GenrePageTiles(
+                      author: book.author,
+                      title: book.name,
+                      likes: book.likes,
+                    );
+                  },
+                );
               },
             ),
-
-          )],
+          ),
+        ],
       ),
     );
   }
