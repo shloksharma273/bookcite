@@ -81,7 +81,11 @@ class ApiService {
     final data = json.decode(response.body);
     final List<dynamic> results = data['results'];
     return results.map((book) => Book.fromJson(book)).toList();
-  } else if (response.statusCode == 401) {
+  } else if (response.statusCode == 404){
+    //No books found
+    return [];
+  }
+  else if (response.statusCode == 401) {
     // Unauthorized → maybe token expired
     throw Exception("Unauthorized. Please login again.");
   } else {

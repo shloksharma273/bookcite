@@ -29,7 +29,7 @@ class _GenrePageState extends State<GenrePage> {
       extendBodyBehindAppBar: true,
       appBar: CustomAppbar(
         onPressed: () => Navigator.pop(context),
-        appBarHeight: MediaQuery.of(context).size.height * 0.07,
+        appBarHeight: MediaQuery.of(context).size.height * 0.10,
         heading: widget.genre,
       ),
       body: Stack(
