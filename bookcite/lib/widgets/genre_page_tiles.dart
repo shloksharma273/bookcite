@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:bookcite/services/api_services.dart';
+import 'package:bookcite/todayspick/todays_pick.dart';
+// import 'package:bookcite/services/models/book_model.dart';
 
 import '../utils/app_colors.dart';
 
@@ -38,6 +41,7 @@ class _GenrePageTilesState extends State<GenrePageTiles> {
   late int _currentLikes;
 
   void doubleTapFunc () {
+
     setState(() {
       if (_isLiked == false) {
         _currentLikes++;
@@ -65,6 +69,41 @@ class _GenrePageTilesState extends State<GenrePageTiles> {
           children: [
             GestureDetector(
               onDoubleTap: doubleTapFunc,
+              onTap: () async {
+                final ApiService apiService = ApiService(baseUrl: "https://bookcite.onrender.com");
+                // Show loading dialog
+                showDialog(
+                  context: context,
+                  barrierDismissible: false,
+                  builder: (context) => const Center(child: CircularProgressIndicator()),
+                );
+                try {
+                  final fetchedBooks = await apiService.fetchBooksByName(widget.title);
+                  if (!context.mounted) return;
+                  Navigator.of(context).pop(); // Dismiss loading dialog
+                  if (fetchedBooks.isNotEmpty) {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => TodaysPick(
+                          book: fetchedBooks.first,
+                        ),
+                      ),
+                    );
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Book not found')),
+                    );
+                  }
+                } catch (e) {
+                  if (context.mounted) {
+                    Navigator.of(context).pop(); // Dismiss loading dialog
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Error: $e')),
+                    );
+                  }
+                }
+              },
               child: Stack(
                 children: [
                   Container(

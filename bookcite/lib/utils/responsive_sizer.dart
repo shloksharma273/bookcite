@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class ResponsiveSizer {
+  // ignore: unused_field
   static const double _designWidth = 375.0; // Your design's reference width
   static const double _designHeight = 812.0; // Your design's reference height
 

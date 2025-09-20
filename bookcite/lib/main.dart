@@ -4,9 +4,9 @@ import 'package:bookcite/genre_page/genre_page.dart';
 import 'package:bookcite/homepage/home_page.dart';
 import 'package:bookcite/search_page/search_page.dart';
 import 'package:bookcite/services/api_services.dart';
-import 'package:bookcite/todayspick/todays_pick.dart';
+// import 'package:bookcite/todayspick/todays_pick.dart';
 import 'package:bookcite/utils/responsive_sizer.dart';
-import 'package:bookcite/genre_page/genre_page.dart';
+// import 'package:bookcite/genre_page/genre_page.dart';
 import 'package:flutter/material.dart';
 
 void main() {
@@ -53,7 +53,7 @@ class MyApp extends StatelessWidget {
         '/signUp' : (context) => SignUpPage(apiService: _apiService),
         '/home' : (context) => HomePage(),
         '/search' : (context) => SearchPage(),
-        '/todayspick' : (context) => TodaysPick(),
+        // '/todayspick' : (context) => TodaysPick(),
         '/fiction': (context) => GenrePage(genre: "Fiction"),
         '/mystery-thriller': (context) => GenrePage(genre: "Mystery, Thriller & Suspense"),
         '/romance': (context) => GenrePage(genre: "Romance"),

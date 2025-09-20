@@ -1,5 +1,6 @@
 import 'package:bookcite/services/api_services.dart';
 import 'package:bookcite/services/models/book_model.dart';
+import 'package:bookcite/widgets/book_details.dart';
 import 'package:bookcite/widgets/custom_appbar.dart';
 import 'package:bookcite/widgets/genre_page_tiles.dart';
 import 'package:flutter/material.dart';
@@ -29,7 +30,7 @@ class _GenrePageState extends State<GenrePage> {
       extendBodyBehindAppBar: true,
       appBar: CustomAppbar(
         onPressed: () => Navigator.pop(context),
-        appBarHeight: MediaQuery.of(context).size.height * 0.10,
+        appBarHeight: (widget.genre.length) > 17 ? MediaQuery.of(context).size.height * 0.10 : MediaQuery.of(context).size.height * 0.07,
         heading: widget.genre,
       ),
       body: Stack(
@@ -62,6 +63,7 @@ class _GenrePageState extends State<GenrePage> {
 
           // Books Grid / Loader / Empty state
           Positioned.fill(
+            top: MediaQuery.of(context).size.height * 0.13,
             child: FutureBuilder<List<Book>>(
               future: _booksFuture,
               builder: (context, snapshot) {

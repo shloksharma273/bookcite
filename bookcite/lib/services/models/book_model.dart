@@ -18,16 +18,28 @@ class Book {
   });
 
   factory Book.fromJson(Map<String, dynamic> json) {
+    // Handle genre as List<Map> or List<String> or String
+    List<String> parsedGenres = [];
+    if (json['genre'] is List) {
+      if ((json['genre'] as List).isNotEmpty && (json['genre'] as List).first is Map) {
+        parsedGenres = (json['genre'] as List)
+            .map((g) => g['name'] as String)
+            .toList();
+      } else {
+        parsedGenres = List<String>.from(json['genre']);
+      }
+    } else if (json['genre'] is String) {
+      parsedGenres = [json['genre']];
+    }
+
     return Book(
       id: json['id'],
       name: json['name'] ?? 'Unknown Title',
       author: json['author'] ?? 'Unknown Author',
-      genres: (json['genre'] as List<dynamic>)
-          .map((g) => g['name'] as String)
-          .toList(),
+      genres: parsedGenres,
       summary: json['summary'] ?? '',
       likes: json['likes'] ?? 0,
-      cover: json['cover'], // null if missing
+      cover: json['cover'],
     );
   }
 }

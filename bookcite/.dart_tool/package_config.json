@@ -290,6 +290,12 @@
       "languageVersion": "3.0"
     },
     {
+      "name": "sidebarx",
+      "rootUri": "file:///home/shawarma/.pub-cache/hosted/pub.dev/sidebarx-0.17.2",
+      "packageUri": "lib/",
+      "languageVersion": "2.15"
+    },
+    {
       "name": "sky_engine",
       "rootUri": "file:///home/shawarma/development/flutter/bin/cache/pkg/sky_engine",
       "packageUri": "lib/",
@@ -398,7 +404,7 @@
       "languageVersion": "3.6"
     }
   ],
-  "generated": "2025-07-29T18:02:31.235068Z",
+  "generated": "2025-09-19T16:13:02.477519Z",
   "generator": "pub",
   "generatorVersion": "3.6.1",
   "flutterRoot": "file:///home/shawarma/development/flutter",
