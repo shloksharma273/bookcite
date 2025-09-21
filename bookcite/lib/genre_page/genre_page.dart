@@ -98,6 +98,7 @@ class _GenrePageState extends State<GenrePage> {
                       author: book.author,
                       title: book.name,
                       likes: book.likes,
+                      cover: book.cover ?? '', // <-- Pass the cover image URL, provide empty string if null  
                     );
                   },
                 );

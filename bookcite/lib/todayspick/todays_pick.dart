@@ -7,6 +7,7 @@ class TodaysPick extends StatelessWidget {
   final Book book;
   final String? heading;
 
+
   const TodaysPick({
     Key? key,
     required this.book,
@@ -30,6 +31,7 @@ class TodaysPick extends StatelessWidget {
         title: book.name,
         author: book.author,
         summary: book.summary,
+        cover: book.cover,
       ),
     );
   }

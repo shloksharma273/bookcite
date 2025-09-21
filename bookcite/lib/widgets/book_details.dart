@@ -1,4 +1,5 @@
 import 'package:bookcite/utils/app_colors.dart';
+import 'package:bookcite/widgets/custom_button.dart';
 import 'package:flutter/material.dart';
 
 class BookDetails extends StatefulWidget {
@@ -6,15 +7,15 @@ class BookDetails extends StatefulWidget {
   final String author;
   final List<String> genreTags;
   final String summary;
+  final String? cover;
 
   const BookDetails(
-      {
-        super.key,
-        required this.genreTags,
-        required this.title,
-        required this.author,
-        required this.summary
-      });
+      {super.key,
+      required this.genreTags,
+      required this.title,
+      required this.author,
+      required this.summary,
+      this.cover});
 
   @override
   State<BookDetails> createState() => _BookDetailsState();
@@ -38,7 +39,6 @@ class _BookDetailsState extends State<BookDetails> {
                 color: AppColors.colorSurfacePrimary),
           ),
         ),
-
         Positioned(
           top: MediaQuery.of(context).size.height * 0.03,
           left: MediaQuery.of(context).size.width * 0.00,
@@ -46,7 +46,8 @@ class _BookDetailsState extends State<BookDetails> {
           bottom: MediaQuery.of(context).size.width * 0.05,
           child: SingleChildScrollView(
             child: Padding(
-              padding:  EdgeInsets.symmetric(horizontal: MediaQuery.of(context).size.width * 0.03),
+              padding: EdgeInsets.symmetric(
+                  horizontal: MediaQuery.of(context).size.width * 0.03),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -54,7 +55,6 @@ class _BookDetailsState extends State<BookDetails> {
                   SizedBox(
                     height: MediaQuery.of(context).size.height * 0.09,
                   ),
-
                   Row(
                     children: [
                       Container(
@@ -66,6 +66,13 @@ class _BookDetailsState extends State<BookDetails> {
                           borderRadius: BorderRadius.circular(
                               MediaQuery.of(context).size.height * 0.02),
                           color: Colors.transparent,
+                        ),
+                        child: Image.network(
+                          widget.cover ??
+                              ' ', // <-- Use the cover image from input
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) =>
+                              const Icon(Icons.broken_image),
                         ),
                       ),
                       SizedBox(
@@ -94,10 +101,12 @@ class _BookDetailsState extends State<BookDetails> {
                   Wrap(
                     spacing: MediaQuery.of(context).size.width * 0.02,
                     runSpacing: MediaQuery.of(context).size.height * 0.009,
-                    children: widget.genreTags.map((genre){
+                    children: widget.genreTags.map((genre) {
                       return Container(
                         height: MediaQuery.of(context).size.height * 0.04,
-                        width: genre.length > 7 ? MediaQuery.of(context).size.width * 0.3 : MediaQuery.of(context).size.width * 0.2,
+                        width: genre.length > 7
+                            ? MediaQuery.of(context).size.width * 0.3
+                            : MediaQuery.of(context).size.width * 0.2,
                         decoration: BoxDecoration(
                             color: Colors.transparent,
                             borderRadius: BorderRadius.circular(
@@ -108,7 +117,7 @@ class _BookDetailsState extends State<BookDetails> {
                         child: Padding(
                           padding: EdgeInsets.symmetric(
                               horizontal:
-                              MediaQuery.of(context).size.width * 0.005),
+                                  MediaQuery.of(context).size.width * 0.005),
                           child: Center(
                             child: Text(
                               genre,
@@ -118,37 +127,36 @@ class _BookDetailsState extends State<BookDetails> {
                           ),
                         ),
                       );
-                    }).toList(),),
-
-
+                    }).toList(),
+                  ),
                   SizedBox(
                     height: MediaQuery.of(context).size.height * 0.08,
                   ),
                   Padding(
                     padding: EdgeInsets.symmetric(
-                        horizontal:
-                        MediaQuery.of(context).size.width * 0.02),
+                        horizontal: MediaQuery.of(context).size.width * 0.02),
                     child: RichText(
-                      text: TextSpan(
-                          style: textTheme.headlineMedium,
-                          children: [
-                            TextSpan(
-                                text: "Short ",
-                                style: TextStyle(
-                                  color: AppColors.colorButtonPrimary,
-                                )),
-                            TextSpan(text: "Take")
-                          ]),
+                      text:
+                          TextSpan(style: textTheme.headlineMedium, children: [
+                        TextSpan(
+                            text: "Short ",
+                            style: TextStyle(
+                              color: AppColors.colorButtonPrimary,
+                            )),
+                        TextSpan(text: "Take")
+                      ]),
                     ),
                   ),
-                  Text(
-                      widget.summary,
-                      style: textTheme.bodyMedium),
+                  Text(widget.summary, style: textTheme.bodyMedium),
+                  SizedBox(
+                    height: MediaQuery.of(context).size.height * 0.03,
+                  ),
+                  CustomButton(onTap: () {}, title: "Download")
                 ],
               ),
             ),
-          ),)
-
+          ),
+        )
       ],
     );
   }

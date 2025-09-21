@@ -23,6 +23,8 @@ class _LikedBooksState extends State<LikedBooks>  {
     _booksFuture = _apiService.fetchLikedBooks(); // <-- Use fetchLikedBooks here
   }
 
+  
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -100,6 +102,7 @@ class _LikedBooksState extends State<LikedBooks>  {
                       author: book.author,
                       title: book.name,
                       likes: book.likes,
+                      cover: book.cover ?? '', // <-- Pass the cover image URL, provide empty string if null
                     );
                   },
                 );

@@ -1,15 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:bookcite/services/api_services.dart';
 import 'package:bookcite/todayspick/todays_pick.dart';
-// import 'package:bookcite/services/models/book_model.dart';
-
 import '../utils/app_colors.dart';
 
 class GenrePageTiles extends StatefulWidget {
   final String author;
   final String title;
   final int likes;
-  const GenrePageTiles({super.key, required this.title, required this.author, required this.likes});
+  final String cover; // <-- Add this line
+
+  const GenrePageTiles({
+    super.key,
+    required this.title,
+    required this.author,
+    required this.likes,
+    required this.cover, // <-- Add this line
+  });
 
   @override
   State<GenrePageTiles> createState() => _GenrePageTilesState();
@@ -41,7 +47,6 @@ class _GenrePageTilesState extends State<GenrePageTiles> {
   late int _currentLikes;
 
   void doubleTapFunc () {
-
     setState(() {
       if (_isLiked == false) {
         _currentLikes++;
@@ -113,6 +118,11 @@ class _GenrePageTilesState extends State<GenrePageTiles> {
                       color: Colors.transparent,
                       border:
                       Border.all(color: AppColors.colorBlack, width: 2),
+                    ),
+                    child: Image.network(
+                      widget.cover, // <-- Use the cover image from input
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) => const Icon(Icons.broken_image),
                     ),
                   ),
                   Positioned(

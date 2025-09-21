@@ -6,6 +6,7 @@ class Book {
   final String summary;
   final String? cover;
   final int likes;
+  final String document;
 
   Book({
     required this.id,
@@ -14,6 +15,7 @@ class Book {
     required this.genres,
     required this.summary,
     required this.likes,
+    required this.document,
     this.cover,
   });
 
@@ -40,6 +42,7 @@ class Book {
       summary: json['summary'] ?? '',
       likes: json['likes'] ?? 0,
       cover: json['cover'],
+      document: json['document'] ?? '',
     );
   }
 }

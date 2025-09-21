@@ -87,6 +87,14 @@ class ExampleSidebarX extends StatelessWidget {
         //     }),
 
         SidebarXItem(
+          icon: Icons.upload_file,
+          label: 'Upload',
+          onTap: () {
+            Navigator.pushNamed(context, '/uploadbook');
+          },
+        ),
+
+        SidebarXItem(
           icon: Icons.people,
           label: 'Log Out',
           onTap: () async {
