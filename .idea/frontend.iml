@@ -18,6 +18,10 @@
       <excludeFolder url="file://$MODULE_DIR$/bookcite/windows/flutter/ephemeral/.plugin_symlinks/path_provider_windows/example/.dart_tool" />
       <excludeFolder url="file://$MODULE_DIR$/bookcite/windows/flutter/ephemeral/.plugin_symlinks/path_provider_windows/example/.pub" />
       <excludeFolder url="file://$MODULE_DIR$/bookcite/windows/flutter/ephemeral/.plugin_symlinks/path_provider_windows/example/build" />
+      <excludeFolder url="file://$MODULE_DIR$/bookcite/android/.gradle" />
+      <excludeFolder url="file://$MODULE_DIR$/bookcite/linux/flutter/ephemeral" />
+      <excludeFolder url="file://$MODULE_DIR$/bookcite/macos/Flutter/ephemeral" />
+      <excludeFolder url="file://$MODULE_DIR$/bookcite/windows/flutter/ephemeral" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />

@@ -1,9 +1,9 @@
-import 'package:bookcite/widgets/custom_appbar.dart';
+import 'package:bookcite/sidebar/custom_sidebar.dart';
 import 'package:bookcite/widgets/homepage_appbar.dart';
 import 'package:bookcite/widgets/homepage_feed_card.dart';
 import 'package:flutter/material.dart';
+import 'package:sidebarx/sidebarx.dart';
 import '../utils/app_colors.dart';
-import '../widgets/book_details.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -18,12 +18,18 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+    final _controller = SidebarXController(selectedIndex: 0, extended: true);
+
 
     return Scaffold(
       resizeToAvoidBottomInset: true,
       extendBodyBehindAppBar: true,
       appBar: HomepageAppbar(
-          appBarHeight: MediaQuery.of(context).size.height * 0.07),
+          appBarHeight: MediaQuery.of(context).size.height * 0.07,
+
+      searchRoute: '/search',
+      favouriteRoute: '/todayspick',),
+      drawer: ExampleSidebarX(controller: _controller),
       body: Stack(
         children: [
           Positioned(

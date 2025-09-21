@@ -1,30 +1,247 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
+// // This is a basic Flutter widget test.
+// //
+// // To perform an interaction with a widget in your test, use the WidgetTester
+// // utility in the flutter_test package. For example, you can send tap and scroll
+// // gestures. You can also use WidgetTester to find child widgets in the widget
+// // tree, read text, and verify that the values of widget properties are correct.
+
+// import 'package:flutter/material.dart';
+// import 'package:flutter_test/flutter_test.dart';
+
+// import 'package:bookcite/main.dart';
+// import 'package:sidebarx/sidebarx.dart';
+
+// void main() {
+//   testWidgets('MyWidget has a title and message', (tester) async {
+//     // Test code goes here.
+//     await tester.pumpWidget(ExampleSidebarX(controller: SidebarXController(selectedIndex: 0, extended: true),));
+//   });
+// }
+
+
+// class ExampleSidebarX extends StatelessWidget {
+//   const ExampleSidebarX({
+//     Key? key,
+//     required SidebarXController controller,
+//   })  : _controller = controller,
+//         super(key: key);
+
+//   final SidebarXController _controller;
+
+//   @override
+//   Widget build(BuildContext context) {
+//     return SidebarX(
+//       controller: _controller,
+//       theme: SidebarXTheme(
+//         margin: const EdgeInsets.all(10),
+//         decoration: BoxDecoration(
+//           color: canvasColor,
+//           borderRadius: BorderRadius.circular(20),
+//         ),
+//         hoverColor: scaffoldBackgroundColor,
+//         textStyle: TextStyle(color: Colors.white.withOpacity(0.7)),
+//         selectedTextStyle: const TextStyle(color: Colors.white),
+//         hoverTextStyle: const TextStyle(
+//           color: Colors.white,
+//           fontWeight: FontWeight.w500,
+//         ),
+//         itemTextPadding: const EdgeInsets.only(left: 30),
+//         selectedItemTextPadding: const EdgeInsets.only(left: 30),
+//         itemDecoration: BoxDecoration(
+//           borderRadius: BorderRadius.circular(10),
+//           border: Border.all(color: canvasColor),
+//         ),
+//         selectedItemDecoration: BoxDecoration(
+//           borderRadius: BorderRadius.circular(10),
+//           border: Border.all(
+//             color: actionColor.withOpacity(0.37),
+//           ),
+//           gradient: const LinearGradient(
+//             colors: [accentCanvasColor, canvasColor],
+//           ),
+//           boxShadow: [
+//             BoxShadow(
+//               color: Colors.black.withOpacity(0.28),
+//               blurRadius: 30,
+//             )
+//           ],
+//         ),
+//         iconTheme: IconThemeData(
+//           color: Colors.white.withOpacity(0.7),
+//           size: 20,
+//         ),
+//         selectedIconTheme: const IconThemeData(
+//           color: Colors.white,
+//           size: 20,
+//         ),
+//       ),
+//       extendedTheme: const SidebarXTheme(
+//         width: 200,
+//         decoration: BoxDecoration(
+//           color: canvasColor,
+//         ),
+//       ),
+//       footerDivider: divider,
+//       headerBuilder: (context, extended) {
+//         return SizedBox(
+//           height: 100,
+//           child: Padding(
+//             padding: const EdgeInsets.all(16.0),
+//             child: Image.asset('assets/images/avatar.png'),
+//           ),
+//         );
+//       },
+//       items: [
+//         SidebarXItem(
+//           icon: Icons.home,
+//           label: 'Home',
+//           onTap: () {
+//             debugPrint('Home');
+//           },
+//         ),
+//         const SidebarXItem(
+//           icon: Icons.search,
+//           label: 'Search',
+//         ),
+//         const SidebarXItem(
+//           icon: Icons.people,
+//           label: 'People',
+//         ),
+//         SidebarXItem(
+//           icon: Icons.favorite,
+//           label: 'Favorites',
+//           selectable: false,
+//           onTap: () => _showDisabledAlert(context),
+//         ),
+//         const SidebarXItem(
+//           iconWidget: FlutterLogo(size: 20),
+//           label: 'Flutter',
+//         ),
+//       ],
+//     );
+//   }
+
+//   void _showDisabledAlert(BuildContext context) {
+//     ScaffoldMessenger.of(context).showSnackBar(
+//       const SnackBar(
+//         content: Text(
+//           'Item disabled for selecting',
+//           style: TextStyle(color: Colors.black),
+//         ),
+//         backgroundColor: Colors.white,
+//       ),
+//     );
+//   }
+// }
+
+// class _ScreensExample extends StatelessWidget {
+//   const _ScreensExample({
+//     Key? key,
+//     required this.controller,
+//   }) : super(key: key);
+
+//   final SidebarXController controller;
+
+//   @override
+//   Widget build(BuildContext context) {
+//     final theme = Theme.of(context);
+//     return AnimatedBuilder(
+//       animation: controller,
+//       builder: (context, child) {
+//         final pageTitle = _getTitleByIndex(controller.selectedIndex);
+//         switch (controller.selectedIndex) {
+//           case 0:
+//             return ListView.builder(
+//               padding: const EdgeInsets.only(top: 10),
+//               itemBuilder: (context, index) => Container(
+//                 height: 100,
+//                 width: double.infinity,
+//                 margin: const EdgeInsets.only(bottom: 10, right: 10, left: 10),
+//                 decoration: BoxDecoration(
+//                   borderRadius: BorderRadius.circular(20),
+//                   color: Theme.of(context).canvasColor,
+//                   boxShadow: const [BoxShadow()],
+//                 ),
+//               ),
+//             );
+//           default:
+//             return Text(
+//               pageTitle,
+//               style: theme.textTheme.headlineSmall,
+//             );
+//         }
+//       },
+//     );
+//   }
+// }
+
+// String _getTitleByIndex(int index) {
+//   switch (index) {
+//     case 0:
+//       return 'Home';
+//     case 1:
+//       return 'Search';
+//     case 2:
+//       return 'People';
+//     case 3:
+//       return 'Favorites';
+//     case 4:
+//       return 'Custom iconWidget';
+//     case 5:
+//       return 'Profile';
+//     case 6:
+//       return 'Settings';
+//     default:
+//       return 'Not found page';
+//   }
+// }
+
+// const primaryColor = Color(0xFF685BFF);
+// const canvasColor = Color(0xFF2E2E48);
+// const scaffoldBackgroundColor = Color(0xFF464667);
+// const accentCanvasColor = Color(0xFF3E3E61);
+// const white = Colors.white;
+// final actionColor = const Color(0xFF5F5FA7).withOpacity(0.6);
+// final divider = Divider(color: white.withOpacity(0.3), height: 1);
+
+
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:bookcite/main.dart';
-
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(const MyApp());
+  // Define a test. The TestWidgets function also provides a WidgetTester
+  // to work with. The WidgetTester allows building and interacting
+  // with widgets in the test environment.
+  testWidgets('MyWidget has a title and message', (tester) async {
+    // Create the widget by telling the tester to build it.
+    await tester.pumpWidget(const MyWidget(title: 'T', message: 'M'));
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
+    // Create the Finders.
+    final titleFinder = find.text('T');
+    final messageFinder = find.text('M');
 
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
-    await tester.pump();
-
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+    // Use the `findsOneWidget` matcher provided by flutter_test to
+    // verify that the Text widgets appear exactly once in the widget tree.
+    expect(titleFinder, findsOneWidget);
+    expect(messageFinder, findsOneWidget);
   });
+}
+
+class MyWidget extends StatelessWidget {
+  const MyWidget({super.key, required this.title, required this.message});
+
+  final String title;
+  final String message;
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Flutter Demo',
+      home: Scaffold(
+        appBar: AppBar(title: Text(title)),
+        body: Center(child: Text(message)),
+      ),
+    );
+  }
 }

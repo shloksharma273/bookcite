@@ -1,12 +1,21 @@
 import 'package:flutter/material.dart';
-
+import 'package:bookcite/services/api_services.dart';
+import 'package:bookcite/todayspick/todays_pick.dart';
 import '../utils/app_colors.dart';
 
 class GenrePageTiles extends StatefulWidget {
   final String author;
   final String title;
   final int likes;
-  const GenrePageTiles({super.key, required this.title, required this.author, required this.likes});
+  final String cover; // <-- Add this line
+
+  const GenrePageTiles({
+    super.key,
+    required this.title,
+    required this.author,
+    required this.likes,
+    required this.cover, // <-- Add this line
+  });
 
   @override
   State<GenrePageTiles> createState() => _GenrePageTilesState();
@@ -65,6 +74,41 @@ class _GenrePageTilesState extends State<GenrePageTiles> {
           children: [
             GestureDetector(
               onDoubleTap: doubleTapFunc,
+              onTap: () async {
+                final ApiService apiService = ApiService(baseUrl: "https://bookcite.onrender.com");
+                // Show loading dialog
+                showDialog(
+                  context: context,
+                  barrierDismissible: false,
+                  builder: (context) => const Center(child: CircularProgressIndicator()),
+                );
+                try {
+                  final fetchedBooks = await apiService.fetchBooksByName(widget.title);
+                  if (!context.mounted) return;
+                  Navigator.of(context).pop(); // Dismiss loading dialog
+                  if (fetchedBooks.isNotEmpty) {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => TodaysPick(
+                          book: fetchedBooks.first,
+                        ),
+                      ),
+                    );
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Book not found')),
+                    );
+                  }
+                } catch (e) {
+                  if (context.mounted) {
+                    Navigator.of(context).pop(); // Dismiss loading dialog
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Error: $e')),
+                    );
+                  }
+                }
+              },
               child: Stack(
                 children: [
                   Container(
@@ -74,6 +118,11 @@ class _GenrePageTilesState extends State<GenrePageTiles> {
                       color: Colors.transparent,
                       border:
                       Border.all(color: AppColors.colorBlack, width: 2),
+                    ),
+                    child: Image.network(
+                      widget.cover, // <-- Use the cover image from input
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) => const Icon(Icons.broken_image),
                     ),
                   ),
                   Positioned(

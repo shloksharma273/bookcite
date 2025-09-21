@@ -5,7 +5,8 @@ import '../utils/app_colors.dart';
 class HomePageTextField extends StatefulWidget {
   final String labelText;
   final bool toObscure;
-  const HomePageTextField({super.key, required this.labelText, required this.toObscure});
+  final TextEditingController controller;
+  const HomePageTextField({super.key, required this.labelText, required this.toObscure, required this.controller});
 
 
   @override
@@ -19,6 +20,7 @@ class _HomePageTextFieldState extends State<HomePageTextField> {
       width: MediaQuery.of(context).size.width * 0.83,
       height: MediaQuery.of(context).size.height * 0.055,
       child: TextField(
+        controller: widget.controller,
         obscureText: widget.toObscure,
         cursorColor: AppColors.colorBlack,
         cursorHeight: MediaQuery.of(context).size.height * 20/852,

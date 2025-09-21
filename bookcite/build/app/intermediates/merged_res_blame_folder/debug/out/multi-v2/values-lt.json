@@ -1,7 +1,7 @@
 {
     "logs": [
         {
-            "outputFile": "com.example.bookcite.app-mergeDebugResources-24:/values-lt/values-lt.xml",
+            "outputFile": "com.example.bookcite.app-mergeDebugResources-25:/values-lt/values-lt.xml",
             "map": [
                 {
                     "source": "/home/shawarma/.gradle/caches/transforms-3/af886955268e5f7dac26381d8db13842/transformed/core-1.15.0/res/values-lt/values-lt.xml",
